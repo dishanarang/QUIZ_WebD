@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Guidelines</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #e33f83, #ff758c);
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: #ffefef;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+
+        .guidelines {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            flex: 1 1 calc(30% - 20px);
+            max-width: 300px;
+            min-width: 250px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .card i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ffe0e0;
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .card p {
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+    </style>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Game Guidelines</h1>
+        <p>Follow these rules to ensure a fair and fun experience for everyone!</p>
+        <div class="guidelines">
+            <div class="card">
+                <i class="fas fa-clock"></i>
+                <h3>Time Management</h3>
+                <p>Complete the quiz within the given time limit. Be quick but accurate!</p>
+            </div>
+            <div class="card">
+                <i class="fas fa-brain"></i>
+                <h3>Think Smart</h3>
+                <p>Think through each question carefully before answering. Every point matters!</p>
+            </div>
+            <div class="card">
+                <i class="fas fa-user-check"></i>
+                <h3>Play Fair</h3>
+                <p>Refrain from cheating or using unfair means. Honesty is key!</p>
+            </div>
+            <div class="card">
+                <i class="fas fa-users"></i>
+                <h3>Respect Others</h3>
+                <p>Maintain a respectful environment for everyone participating in the game.</p>
+            </div>
+            <div class="card">
+                <i class="fas fa-award"></i>
+                <h3>Aim for the Top</h3>
+                <p>Challenge yourself and strive for the highest score!</p>
+            </div>
+            <div class="card">
+                <i class="fas fa-exclamation-circle"></i>
+                <h3>Follow Rules</h3>
+                <p>Adhere to all the rules set by the game administrators.</p>
+            </div>
+        </div>
+    </div>
+    <footer>
+        &copy; 2025 Quiz Master. All rights reserved.
+    </footer>
+</body>
+</html>

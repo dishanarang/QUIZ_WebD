@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Register Interface</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: linear-gradient(rgba(240, 227, 227, 0.4),rgba(0,0,0,0.4)),url(aurora3.jpg);
+            background-position:center;
+            background-size: cover;
+        }
+        .wrapper {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .container {
+            width: 350px;
+            padding: 20px;
+            background: rgb(247, 248, 224);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin: 10px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+           
+        }
+        
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background: #e32054;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #cd1010;
+        }
+
+        .toggle-link {
+            text-align: center;
+            margin-top: 15px;
+            color: #c90003;
+            cursor: pointer;
+        }
+
+        .toggle-link:hover {
+            text-decoration: underline;
+        }
+
+        #login:checked ~ .forms #login-form,
+        #admin-login:checked ~ .forms #admin-login-form {
+            display: block;
+        }
+
+        #login:checked ~ .forms #register-form,
+        #admin-login:checked ~ .forms #admin-register-form {
+            display: none;
+        }
+
+        #register:checked ~ .forms #login-form,
+        #admin-register:checked ~ .forms #admin-login-form {
+            display: none;
+        }
+
+        #register:checked ~ .forms #register-form,
+        #admin-register:checked ~ .forms #admin-register-form {
+            display: block;
+        }
+
+        /* Media Queries for responsiveness */
+        @media (max-width: 768px) {
+            .wrapper {
+                flex-direction: column;
+            }
+
+            .container {
+                width: 90%;
+                margin: 10px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h2 {
+                font-size: 18px;
+            }
+
+            input[type="email"], input[type="password"] {
+                width:100%;
+                font-size: 18px;
+                padding: 12px;
+                border: 1px solid #ccc;
+                border-radius :5px;;
+                
+            }
+
+            .btn {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    
+    <div class="container">
+
+        <input type="radio" name="toggle" id="login" checked hidden>
+        <input type="radio" name="toggle" id="register" hidden>
+
+        <div class="forms">
+            <!--USER LOGIN FORM-->
+            <form id="login-form">
+                <h2>User Login</h2>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="login-email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" id="login-submit" class="btn">Login</button>
+                <label class="toggle-link" for="register">Don't have an account? Register</label>
+            </form>
+            <!--USER REGISTER FORM-->
+            <form id="register-form">
+                <h2>User Register</h2>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="register-email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-password">Password</label>
+                    <input type="password" id="register-password" placeholder="Choose a password" required>
+                </div>
+                <button type="submit" id="register-submit" class="btn">Register</button>
+                <label class="toggle-link" for="login">Already have an account? Login</label>
+            </form>
+        </div>
+    </div>
+
+    <div class="container">
+        <input type="radio" name="admin-toggle" id="admin-login" checked hidden>
+        <input type="radio" name="admin-toggle" id="admin-register" hidden>
+        <!--Admin Login Form-->
+        <div class="forms">
+            <form id="admin-login-form">
+                <h2>Admin Login</h2>
+                <div class="form-group">
+                    <label for="admin-email">Email</label>
+                    <input type="email" id="admin-login-email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">Password</label>
+                    <input type="password" id="admin-login-password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" id="admin-login-submit" class="btn">Login</button>
+                <label class="toggle-link" for="admin-register">Don't have an account? Register</label>
+            </form>
+
+            <!--Admin Register Form-->
+            <form id="admin-register-form">
+                <h2>Admin Register</h2>
+                <div class="form-group">
+                    <label for="admin-email">Email</label>
+                    <input type="email" id="admin-register-email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-new-password">Password</label>
+                    <input type="password" id="admin-register-password" placeholder="Choose a password" required>
+                </div>
+                <button type="submit" id="admin-register-submit" class="btn">Register</button>
+                <label class="toggle-link" for="admin-login">Already have an account? Login</label>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="module" src="register.js" defer></script>
+</body>
+</html>

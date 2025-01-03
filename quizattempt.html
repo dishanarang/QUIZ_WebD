@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attempt Quiz</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: url(quizz.jpg);
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: linear-gradient(rgba(225, 237, 190, 0.5), rgba(213, 230, 235, 0.7));
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      color: #000000;
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      font-size: 2.2rem;
+      margin: 20px 0;
+      color: #05090d;
+    }
+
+    .timer {
+      font-size: 1.5rem;
+      color: #ff0000;
+      margin-bottom: 15px;
+    }
+
+    .question {
+      margin-bottom: 20px;
+    }
+
+    .question h3 {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      color: rgb(0, 0, 0);
+    }
+
+    .options {
+      margin: 10px 0;
+    }
+
+    .options button {
+      width: 100%;
+      padding: 15px;
+      font-size: 1.2rem;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: linear-gradient(100deg, #ea2e67, #fd859b);
+      color: #333;
+      text-align: left;
+      padding-left: 20px;
+      transition: 0.3s ease;
+    }
+
+    .options button:hover {
+      background: linear-gradient(135deg, #e22e58, #d00a66);
+    }
+
+    .options button.selected {
+      background: linear-gradient(135deg, #bb669c, #9743a0);
+      color: white;
+    }
+
+    .navigation-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .navigation-buttons button {
+      flex: 1;
+      padding: 15px;
+      font-size: 1rem;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #211650;
+      color: white;
+      transition: 0.3s ease;
+    }
+
+    .navigation-buttons button:hover {
+      background: #0056b3;
+    }
+
+    .submit-btn {
+      background: #28a745;
+    }
+
+    .submit-btn:hover {
+      background: #218838;
+    }
+
+    .next-section-btn {
+      background: #ff5722;
+    }
+
+    .next-section-btn:hover {
+      background: #e64a19;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 id="quiz-title">Loading Quiz...</h2>
+    <div id="timer" class="timer">Time Remaining: 00:00</div>
+    <h3 id="section-title" class="section-title"></h3>
+    <div id="question-container"></div>
+    <div class="navigation-buttons">
+      <button id="prev-btn" style="display: none;">Previous</button>
+      <button id="next-btn" style="display: none;">Next</button>
+      <button id="next-section-btn" style="display: none;" class="next-section-btn">Next Section</button>
+      <button id="submit-btn" style="display: none;" class="submit-btn">Submit Quiz</button>
+    </div>
+  </div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  collection,
+  addDoc,
+  serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBZXZop4nK4xk-VltfoYp-kRhsCHZ4IcYA",
+  authDomain: "loginexample-5ae09.firebaseapp.com",
+  projectId: "loginexample-5ae09",
+  storageBucket: "loginexample-5ae09.appspot.com",
+  messagingSenderId: "484592425419",
+  appId: "1:484592425419:web:5a1be64b4b778f2e51fe4e",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const urlParams = new URLSearchParams(window.location.search);
+const quizId = urlParams.get("quizId");
+
+const quizTitleElem = document.getElementById("quiz-title");
+const sectionTitleElem = document.getElementById("section-title");
+const questionContainer = document.getElementById("question-container");
+const timerElem = document.getElementById("timer");
+const prevBtn = document.getElementById("prev-btn");
+const nextBtn = document.getElementById("next-btn");
+const nextSectionBtn = document.getElementById("next-section-btn");
+const submitBtn = document.getElementById("submit-btn");
+
+let quizData = {};
+let userAnswers = {};
+let currentSectionIndex = 0;
+let currentQuestionIndex = 0;
+let sections = ["physics", "chemistry", "mathematics"];
+let score = 0;
+let remainingTime = 0;
+let timerInterval = null;
+
+// Authenticate and load quiz
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    alert("You must be logged in to attempt this quiz.");
+    window.location.href = "register.html";
+    return;
+  }
+
+  try {
+    await loadQuiz();
+    startTimer();
+  } catch (error) {
+    console.error("Error loading quiz:", error);
+    quizTitleElem.textContent = "Error Loading Quiz. Please try again.";
+  }
+});
+
+// Load quiz data from Firestore
+async function loadQuiz() {
+  if (!quizId) {
+    throw new Error("Invalid quiz ID");
+  }
+
+  const quizRef = doc(db, "quizzes", quizId);
+  const quizSnap = await getDoc(quizRef);
+
+  if (!quizSnap.exists()) {
+    quizTitleElem.textContent = "Quiz Not Found";
+    throw new Error("Quiz not found in Firestore.");
+  }
+
+  quizData = quizSnap.data();
+  quizTitleElem.textContent = quizData.title;
+  remainingTime = quizData.timer * 60;
+
+  userAnswers = sections.reduce((acc, section) => {
+    acc[section] = new Array(quizData.questions[section]?.length || 0).fill(null);
+    return acc;
+  }, {});
+
+  loadSection(0);
+}
+
+// Load a specific section
+function loadSection(sectionIndex) {
+  if (sectionIndex >= sections.length) {
+    submitQuiz();
+    return;
+  }
+
+  currentSectionIndex = sectionIndex;
+  currentQuestionIndex = 0;
+
+  const sectionName = sections[sectionIndex];
+  const sectionQuestions = quizData.questions[sectionName];
+
+  if (!sectionQuestions || sectionQuestions.length === 0) {
+    loadSection(sectionIndex + 1);
+    return;
+  }
+
+  sectionTitleElem.textContent = `${sectionName.charAt(0).toUpperCase()}${sectionName.slice(1)} Section`;
+  displayQuestion();
+}
+
+// Display the current question
+function displayQuestion() {
+  const sectionName = sections[currentSectionIndex];
+  const question = quizData.questions[sectionName][currentQuestionIndex];
+  const userAnswer = userAnswers[sectionName][currentQuestionIndex];
+
+  questionContainer.innerHTML = "";
+
+  const questionElem = document.createElement("div");
+  questionElem.className = "question";
+
+  const questionTitle = document.createElement("h3");
+  questionTitle.textContent = `${currentQuestionIndex + 1}. ${question.questionText}`;
+  questionElem.appendChild(questionTitle);
+
+  const optionsContainer = document.createElement("div");
+  optionsContainer.className = "options";
+
+  question.options.forEach((option, index) => {
+    const optionButton = document.createElement("button");
+    optionButton.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+    optionButton.classList.toggle("selected", userAnswer === index);
+    optionButton.onclick = () => selectAnswer(index, optionsContainer);
+    optionsContainer.appendChild(optionButton);
+  });
+
+  questionElem.appendChild(optionsContainer);
+  questionContainer.appendChild(questionElem);
+
+  prevBtn.style.display = currentQuestionIndex > 0 || currentSectionIndex > 0 ? "block" : "none";
+  nextBtn.style.display = currentQuestionIndex < quizData.questions[sections[currentSectionIndex]].length - 1 ? "block" : "none";
+  nextSectionBtn.style.display = currentQuestionIndex === quizData.questions[sections[currentSectionIndex]].length - 1 && currentSectionIndex < sections.length - 1 ? "block" : "none";
+  submitBtn.style.display = currentSectionIndex === sections.length - 1 && currentQuestionIndex === quizData.questions[sections[currentSectionIndex]].length - 1 ? "block" : "none";
+}
+
+// Handle selecting an answer
+function selectAnswer(optionIndex, optionsContainer) {
+  const sectionName = sections[currentSectionIndex];
+  userAnswers[sectionName][currentQuestionIndex] = optionIndex;
+
+  Array.from(optionsContainer.children).forEach((child, index) => {
+    child.classList.toggle("selected", index === optionIndex);
+  });
+}
+
+// Navigate to the previous question/section
+prevBtn.addEventListener("click", () => {
+  if (currentQuestionIndex > 0) {
+    currentQuestionIndex--;
+  } else if (currentSectionIndex > 0) {
+    currentSectionIndex--;
+    loadSection(currentSectionIndex);
+  }
+  displayQuestion();
+});
+
+// Navigate to the next question
+nextBtn.addEventListener("click", () => {
+  if (currentQuestionIndex < quizData.questions[sections[currentSectionIndex]].length - 1) {
+    currentQuestionIndex++;
+  }
+  displayQuestion();
+});
+
+// Navigate to the next section
+nextSectionBtn.addEventListener("click", () => {
+  currentSectionIndex++;
+  loadSection(currentSectionIndex);
+});
+
+// Start the quiz timer
+function startTimer() {
+  timerInterval = setInterval(() => {
+    if (remainingTime <= 0) {
+      clearInterval(timerInterval);
+      submitQuiz();
+      return;
+    }
+
+    remainingTime--;
+    const minutes = Math.floor(remainingTime / 60).toString().padStart(2, "0");
+    const seconds = (remainingTime % 60).toString().padStart(2, "0");
+    timerElem.textContent = `Time Remaining: ${minutes}:${seconds}`;
+  }, 1000);
+}
+
+// Submit the quiz
+submitBtn.addEventListener("click", async () => {
+  clearInterval(timerInterval); // Stop the timer
+  await submitQuiz(); // Call the submitQuiz function
+});
+
+async function submitQuiz() {
+  clearInterval(timerInterval); // Stop the timer when submitting
+
+  const user = auth.currentUser;
+
+  // Calculate the score
+  Object.keys(userAnswers).forEach((section) => {
+    userAnswers[section].forEach((answer, index) => {
+      if (answer !== null) {
+        const question = quizData.questions[section][index];
+        if (question.correctAnswer === question.options[answer]) {
+          score += question.positiveMarks;
+        } else {
+          score += question.negativeMarks;
+        }
+      }
+    });
+  });
+
+  try {
+    // Add the response to Firebase
+    const docRef = await addDoc(collection(db, "responses"), {
+      userId: user.uid,
+      quizId: quizId,
+      answers: userAnswers,
+      score: score,
+      timeTaken: quizData.timer * 60 - remainingTime, // Time taken for the quiz
+      timestamp: serverTimestamp(),
+    });
+
+    console.log("Response ID:", docRef.id); // Debugging: Logs the generated responseId
+
+    // Redirect to performance.html with responseId in URL
+    alert("Quiz Submitted Successfully!");
+    window.location.href = `performance.html?responseId=${docRef.id}`;
+  } catch (error) {
+    console.error("Error submitting quiz:", error);
+    alert("Failed to submit quiz. Try again.");
+  }
+}
+
+
+</script>
+</body>
+</html>

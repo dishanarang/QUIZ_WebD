@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select a Quiz</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-image: url(fun.jpg);
+      background-size: cover;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: white;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      font-weight: bold;
+      color: black;
+      text-shadow: 2px 2px 5px rgba(21, 7, 7, 0.91);
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      color: rgba(13, 11, 11, 0.9);
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    li {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .quiz-button {
+      background: linear-gradient(to right, #ba8deb, #8ba6d6);
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 100;
+      border: none;
+      border-radius: 10px;
+      padding: 5px 5px;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .quiz-button:hover {
+      transform: scale(1.05);
+      background: linear-gradient(to right, #2575fc, #6a11cb);
+    }
+  </style>
+</head>
+<body>
+  <h1>Select a Quiz</h1>
+  <h2>Available quizzes are:</h2>
+  <ul id="quiz-list">Loading quizzes...</ul>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBZXZop4nK4xk-VltfoYp-kRhsCHZ4IcYA",
+      authDomain: "loginexample-5ae09.firebaseapp.com",
+      projectId: "loginexample-5ae09",
+      storageBucket: "loginexample-5ae09.firebasefirestore.app",
+      messagingSenderId: "484592425419",
+      appId: "1:484592425419:web:5a1be64b4b778f2e51fe4e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loadQuizzes(user.uid);
+      } else {
+        alert("You must be logged in to access this page.");
+        window.location.href = "register.html";
+      }
+    });
+
+    async function loadQuizzes(userId) {
+      const quizList = document.getElementById("quiz-list");
+      try {
+        const quizzes = await getDocs(collection(db, "quizzes"));
+        const responses = await getDocs(query(collection(db, "responses"), where("userId", "==", userId)));
+
+        const attemptedQuizzes = new Set();
+        responses.forEach(doc => attemptedQuizzes.add(doc.data().quizId));
+
+        if (quizzes.empty) {
+          quizList.innerHTML = "<p>No quizzes available at the moment.</p>";
+          return;
+        }
+
+        quizList.innerHTML = "";
+        quizzes.forEach(doc => {
+          const quiz = doc.data();
+          const quizButton = document.createElement("button");
+          quizButton.className = "quiz-button";
+          quizButton.textContent = quiz.title || "Untitled Quiz";
+
+          if (attemptedQuizzes.has(doc.id)) {
+            quizButton.onclick = () => alert("Quiz already attempted, cannot retake.");
+          } else {
+            quizButton.onclick = () => window.location.href = `quizattempt.html?quizId=${doc.id}`;
+          }
+
+          const listItem = document.createElement("li");
+          listItem.appendChild(quizButton);
+          quizList.appendChild(listItem);
+        });
+      } catch (error) {
+        console.error("Error loading quizzes:", error);
+        quizList.innerHTML = "<p>Error loading quizzes. Please try again later.</p>";
+      }
+    }
+  </script>
+</body>
+</html>
